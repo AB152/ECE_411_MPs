@@ -45,7 +45,50 @@ initial begin
     reset();
     /************************ Your Code Here ***********************/
     // Feel free to make helper tasks / functions, initial / always blocks, etc.
+    assert(itf.rdy == 1'b1)
+    else begin
+            $error ("%0d: %0t: RESET_DOES_NOT_CAUSE_READY_O error detected", `__LINE__, $time);
+            report_error (RESET_DOES_NOT_CAUSE_READY_O);
+    end
+    for (int i = 0; i < 9'b100000000; ++i) begin
+        @(tb_clk);
+        itf.data_i <= i;
+        @(tb_clk);
+        itf.valid_i <= 1;
+        @(tb_clk);
+        itf.valid_i <= 0;
+        // There are only 2 types of errors, so no need to assert (check) here
+    end
 
+    for (int i = 0; i < 9'b100000000; ++i) begin
+        @(tb_clk);
+        itf.yumi <= 1;
+        // Since it is a fifo, verify i
+        assert(itf.data_o == i)
+        else begin
+            $error ("%0d: %0t: INCORRECT_DATA_O_ON_YUMI_I error detected", `__LINE__, $time);
+            report_error (INCORRECT_DATA_O_ON_YUMI_I);
+        end
+        @(tb_clk);
+        itf.yumi <= 0;
+    end
+
+
+    for (int i = 0; i <= 9'b100000000; ++i) begin
+        @(tb_clk);
+        itf.data_i <= i;
+        @(tb_clk);
+        itf.valid_i <= 1;
+
+        @(tb_clk)
+        itf.yumi <= 1;
+
+        @(tb_clk);
+        itf.yumi <= 0;
+        // @(tb_clk);
+        itf.valid_i <= 0;
+
+    end
 
     /***************************************************************/
     // Make sure your test bench exits by calling itf.finish();
