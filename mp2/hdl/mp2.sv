@@ -14,8 +14,34 @@ import rv32i_types::*;
 );
 
 /******************* Signals Needed for RVFI Monitor *************************/
+
+// For control unit
 logic load_pc;
+logic load_ir;
 logic load_regfile;
+logic load_mar;
+logic load_mdr;
+logic load_data_out;
+alu_ops aluop;
+logic [4:0] rs1;
+logic [4:0] rs2;
+
+
+branch_funct3_t cmpop;
+rv32i_opcode opcode;
+logic [2:0] funct3;
+logic [6:0] funct7;
+logic br_en;
+
+// Out signals
+rv32i_word pc_out;
+rv32i_word pcmux_out;
+rv32i_word rs1_out;
+rv32i_word rs2_out;
+rv32i_word rd;
+rv32i_word regfilemux_out;
+rv32i_word mdrreg_out;
+rv32i_word alu_out;
 /*****************************************************************************/
 
 /**************************** Control Signals ********************************/
@@ -28,11 +54,67 @@ cmpmux::cmpmux_sel_t cmpmux_sel;
 /*****************************************************************************/
 
 /* Instantiate MP 1 top level blocks here */
-
 // Keep control named `control` for RVFI Monitor
-control control(.*);
-
+//control control(.*);
+control control(
+    .clk(clk),
+    .rst(rst),
+    .opcode(opcode),
+    .funct3(funct3),
+    .funct7(funct7),
+    .br_en(br_en),
+    .rs1(rs1),
+    .rs2(rs2),
+    .mem_resp(mem_resp),
+    .pcmux_sel(pcmux_sel),
+    .alumux1_sel(alumux1_sel),
+    .alumux2_sel(alumux2_sel),
+    .regfilemux_sel(regfilemux_sel),
+    .marmux_sel(marmux_sel),
+    .cmpmux_sel(cmpmux_sel),
+    .aluop(aluop),
+    .load_pc(load_pc),
+    .load_ir(load_ir),
+    .load_regfile(load_regfile),
+    .load_mar(load_mar),
+    .load_mdr(load_mdr),
+    .load_data_out(load_data_out),
+    .mem_write(mem_write),
+    .mem_read(mem_read),
+    .cmpop(cmpop),
+    .mem_byte_enable(mem_byte_enable)
+);
 // Keep datapath named `datapath` for RVFI Monitor
-datapath datapath(.*);
+//datapath datapath(.*);
+
+datapath datapath(
+    .clk(clk),
+    .rst(rst),
+    .load_mdr(load_mdr),
+    .mem_rdata(mem_rdata),
+    .mem_wdata(mem_wdata),
+    .opcode(opcode),
+    .funct3(funct3),
+    .funct7(funct7),
+    .br_en(br_en),
+    .rs1(rs1),
+    .rs2(rs2),
+    .mem_address(mem_address),
+
+    .pcmux_sel(pcmux_sel),
+    .alumux1_sel(alumux1_sel),
+    .alumux2_sel(alumux2_sel),
+    .regfilemux_sel(regfilemux_sel),
+    .marmux_sel(marmux_sel),
+    .cmpmux_sel(cmpmux_sel),
+    .aluop(aluop),
+    .load_pc(load_pc),
+    .load_ir(load_ir),
+    .load_regfile(load_regfile),
+    .load_mar(load_mar),
+    .load_data_out(load_data_out),
+    // Extra Signals
+    .cmpop(cmpop)
+);
 
 endmodule : mp2
