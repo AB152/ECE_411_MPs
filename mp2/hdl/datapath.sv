@@ -1,8 +1,8 @@
-import pcmux::*;
-import marmux::*;
-import cmpmux::*;
-import alumux::*;
-import regfilemux::*;
+// import pcmux::*;
+// import marmux::*;
+// import cmpmux::*;
+// import alumux::*;
+// import regfilemux::*;
 import rv32i_types::*; /* Import types defined in rv32i_types.sv */
 module datapath
 import rv32i_types::*;
@@ -27,14 +27,14 @@ import rv32i_types::*;
     input regfilemux::regfilemux_sel_t regfilemux_sel,
     input marmux::marmux_sel_t marmux_sel,
     input cmpmux::cmpmux_sel_t cmpmux_sel,
-    input alu_ops aluop,
+    input rv32i_types::alu_ops aluop,
     input logic load_pc,
     input logic load_ir,
     input logic load_regfile,
     input logic load_mar,
     input logic load_data_out,
     // Extra Signals
-    input branch_funct3_t cmpop
+    input rv32i_types::branch_funct3_t cmpop
 );
 
 /******************* Signals Needed for RVFI Monitor *************************/

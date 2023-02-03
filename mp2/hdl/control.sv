@@ -1,10 +1,5 @@
 
 module control
-import pcmux::*;
-import marmux::*;
-import cmpmux::*;
-import alumux::*;
-import regfilemux::*;
 import rv32i_types::*; /* Import types defined in rv32i_types.sv */
 (
     input clk,
@@ -71,9 +66,9 @@ begin : trap_check
 
         op_load: begin
             case (load_funct3)
-                rv32i_types::lw: rmask = 4'b1111;
-                rv32i_types::lh, rv32i_types::lhu: rmask = 4'bXXXX /* Modify for MP1 Final */ ;
-                rv32i_types::lb, rv32i_types::lbu: rmask = 4'bXXXX /* Modify for MP1 Final */ ;
+                lw: rmask = 4'b1111;
+                lh, lhu: rmask = 4'bXXXX /* Modify for MP1 Final */ ;
+                lb, lbu: rmask = 4'bXXXX /* Modify for MP1 Final */ ;
                 default: trap = '1;
             endcase
         end
@@ -136,7 +131,7 @@ function void set_defaults();
     load_mdr = 1'b0;
     load_data_out = 1'b0;
     pcmux_sel = pcmux::pc_plus4;
-    cmpop = branch_funct3_t '(funct3);
+    cmpop = rv32i_types::branch_funct3_t '(funct3);
     alumux1_sel = alumux::rs1_out;
     alumux2_sel = alumux::i_imm;
     regfilemux_sel = regfilemux::alu_out;
@@ -257,7 +252,7 @@ begin : state_actions
         aluop = rv32i_types::alu_add;
     end
     else if(state == br) begin
-        pcmux_sel = pcmux_sel_t '({1'b0,br_en});
+        pcmux_sel = pcmux::pcmux_sel_t '({1'b0,br_en});
         load_pc = 1;
         alumux1_sel = alumux::pc_out;
         alumux2_sel = alumux::b_imm;
