@@ -11,6 +11,7 @@ import rv32i_types::*; /* Import types defined in rv32i_types.sv */
     input logic [4:0] rs1,
     input logic [4:0] rs2,
     input logic mem_resp,
+    input logic [31:0] alu_out,
     output pcmux::pcmux_sel_t pcmux_sel,
     output alumux::alumux1_sel_t alumux1_sel,
     output alumux::alumux2_sel_t alumux2_sel,
@@ -102,7 +103,10 @@ enum int unsigned {
     ld1,
     st1,
     ld2,
-    st2
+    st2,
+    jal,
+    jalr,
+    rtor
 } state, next_state;
 
 /************************* Function Definitions *******************************/
@@ -257,7 +261,7 @@ begin : state_actions
         alumux1_sel = alumux::pc_out;
         alumux2_sel = alumux::b_imm;
         aluop = rv32i_types::alu_add;
-		cmpop = branch_funct3_t '(funct3); 
+		cmpop = branch_funct3_t '(funct3);
         // rs1_addr = rs1;
         // rs2_addr = rs2;
     end
@@ -267,17 +271,94 @@ begin : state_actions
     end
     else if(state == st1) begin
         mem_write = 1;
+        case(funct3)
+            rv32i_types::sb: mem_byte_enable = 4'h1 << alu_out[1:0];
+            rv32i_types::sh: mem_byte_enable = 4'b0011 << alu_out[1:0];
+            default: mem_byte_enable = 4'hF;
+        endcase
     end
     else if(state == ld2) begin
         load_regfile = 1;
         load_pc = 1;
-        regfilemux_sel = regfilemux::lw;
+        // regfilemux_sel = regfilemux::lw;
+        case(funct3)
+            rv32i_types::lw: regfilemux_sel = regfilemux::lw;
+            rv32i_types::lb: regfilemux_sel = regfilemux::lb;
+            rv32i_types::lh: regfilemux_sel = regfilemux::lh;
+            rv32i_types::lbu: regfilemux_sel = regfilemux::lbu;
+            rv32i_types::lhu: regfilemux_sel = regfilemux::lhu;
+        endcase
         // rs1_addr = rs1;
     end
     else if(state == st2) begin
         load_pc = 1;
         // rs1_addr = rs1;
         // rs2_addr = rs2;
+    end
+    else if(state == jal) begin
+        alumux2_sel = alumux::j_imm;
+        alumux1_sel = alumux::pc_out;
+        aluop = rv32i_types::alu_add;
+        pcmux_sel = pcmux::alu_out;
+        load_pc = 1;
+
+        regfilemux_sel = regfilemux::pc_plus4;
+        load_regfile = 1;
+
+    end
+    else if(state == jalr) begin
+        alumux2_sel = alumux::i_imm;
+        alumux1_sel = alumux::rs1_out;
+        aluop = rv32i_types::alu_add;
+        pcmux_sel = pcmux::alu_mod2;
+        load_pc = 1;
+
+        regfilemux_sel = regfilemux::pc_plus4;
+        load_regfile = 1;
+    end
+    else if(state == rtor) begin
+        load_pc = 1;
+        load_regfile = 1;
+        alumux2_sel = alumux::rs2_out;
+        regfilemux_sel = regfilemux::alu_out;
+
+        if(funct3 == rv32i_types::add && funct7[5] == 0) begin
+            aluop = alu_add;
+        end
+        else if(funct3 == rv32i_types::add && funct7[5] == 1) begin
+            aluop = alu_sub;
+        end
+        else if(funct3 == rv32i_types::sll) begin
+            aluop = alu_sll;
+        end
+        else if(funct3 == rv32i_types::slt) begin
+            cmpop = blt;
+            cmpmux_sel = cmpmux::rs2_out;
+            regfilemux_sel = regfilemux::br_en;
+        end
+        else if(funct3 == rv32i_types::sltu) begin
+            cmpop = bltu;
+            cmpmux_sel = cmpmux::rs2_out;
+            regfilemux_sel = regfilemux::br_en;
+        end
+        else if(funct3 == rv32i_types::axor) begin
+            aluop = alu_xor;
+        end
+        else if(funct3 == rv32i_types::sr && funct7[5] == 0) begin
+            aluop = alu_srl;
+        end
+        else if(funct3 == rv32i_types::sr && funct7[5] == 1) begin
+            aluop = alu_sra;
+        end
+        else if(funct3 == rv32i_types::aor) begin
+            aluop = alu_or;
+        end
+        else if(funct3 == rv32i_types::aand) begin
+            aluop = alu_and;
+        end
+        else begin
+            // Default case
+        end
     end
 
 
@@ -312,6 +393,9 @@ begin : next_state_logic
             rv32i_types::op_imm: next_state = imm;
             rv32i_types::op_br: next_state = br;
             rv32i_types::op_store: next_state = calc_addr_store;
+            rv32i_types::op_jal: next_state = jal;
+            rv32i_types::op_jalr: next_state = jalr;
+            rv32i_types::op_reg: next_state = rtor;
             default: next_state = fetch1;
         endcase
     end
@@ -352,6 +436,15 @@ begin : next_state_logic
         next_state = st2;
     end
     else if(state == st2) begin
+        next_state = fetch1;
+    end
+    else if(state == jal) begin
+        next_state = fetch1;
+    end
+    else if(state == jalr) begin
+        next_state = fetch1;
+    end
+    else if(state == rtor) begin
         next_state = fetch1;
     end
     else begin

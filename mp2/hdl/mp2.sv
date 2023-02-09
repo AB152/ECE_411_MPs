@@ -66,6 +66,7 @@ control control(
     .rs1(rs1),
     .rs2(rs2),
     .mem_resp(mem_resp),
+    .alu_out(alu_out),
     .pcmux_sel(pcmux_sel),
     .alumux1_sel(alumux1_sel),
     .alumux2_sel(alumux2_sel),

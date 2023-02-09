@@ -20,6 +20,7 @@ import rv32i_types::*;
     output logic [4:0] rs1,
     output logic [4:0] rs2,
     output rv32i_word mem_address,
+    output rv32i_word alu_out,
 
     input pcmux::pcmux_sel_t pcmux_sel,
     input alumux::alumux1_sel_t alumux1_sel,
@@ -53,9 +54,13 @@ rv32i_word alumux2_out;
 rv32i_word regfilemux_out;
 rv32i_word marmux_out;
 rv32i_word cmp_mux_out;
-rv32i_word alu_out;
+// rv32i_word alu_out;
+// assign alu_out_ = alu_out;
 rv32i_word pc_out;
 rv32i_word pc_plus4_out;
+rv32i_word temp_mem_address;
+
+assign mem_address = temp_mem_address & 32'hFFFFFFFC;
 /*****************************************************************************/
 
 
@@ -112,7 +117,7 @@ register MAR(
     .rst (rst),
     .load (load_mar),
     .in   (marmux_out),
-    .out  (mem_address)
+    .out  (temp_mem_address)
 );
 
 register MEM_DATA_OUT(
@@ -165,6 +170,7 @@ always_comb begin : MUXES
         alumux::u_imm: alumux2_out = u_imm;
         alumux::b_imm: alumux2_out = b_imm;
         alumux::s_imm: alumux2_out = s_imm;
+        alumux::j_imm: alumux2_out = j_imm;
         alumux::rs2_out: alumux2_out = rs2_out;
         // etc.
     endcase
@@ -175,8 +181,18 @@ always_comb begin : MUXES
         regfilemux::u_imm: regfilemux_out = u_imm;
         regfilemux::pc_plus4: regfilemux_out = pc_out + 32'h4;
         regfilemux::lw: regfilemux_out = mdrreg_out;
+        regfilemux::lb: regfilemux_out = {{24{mdrreg_out[7 + 8 * alu_out[1:0]]}}, mdrreg_out[7 + 8 * alu_out[1:0] -: 8]};
+        regfilemux::lh: begin
+            case (alu_out[1:0])
+                4'b00, 4'b01, 4'b10: regfilemux_out = {{16{mdrreg_out[15 + 7 * alu_out[1:0]]}}, mdrreg_out[(15 + alu_out[1:0]*7) -: 16]};
+                default: regfilemux_out = 0;
+            endcase
+        end
+        regfilemux::lbu: regfilemux_out = {{24{1'b0}}, mdrreg_out[7 + 8 * alu_out[1:0] -: 8]};
+        regfilemux::lhu: regfilemux_out = {{16{1'b0}}, mdrreg_out[(15 + alu_out[1:0]*7) -: 16]};
         // etc.
     endcase
+    
 
     unique case (marmux_sel)
         marmux::pc_out: marmux_out = pc_out;

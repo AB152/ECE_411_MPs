@@ -33,6 +33,12 @@ loop1:
     la x10, result      # X10 <= Addr[result]
     sw x8, 0(x10)       # [Result] <= 0x600d600d
     lw x9, result       # X9 <= [Result]
+    lb x2, good
+    lh x2, good
+    lbu x2, good
+    lhu x2, good
+    jal x1, 3
+    jalr x5, x1, 30000000
     bne x8, x9, deadend # PC <= bad if x8 != x9
 
 halt:                 # Infinite loop to keep the processor

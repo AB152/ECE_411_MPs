@@ -19,7 +19,7 @@ sim/simv: $(SRCS)
 
 run: sim/simv $(ASM)
 	bin/rv_load_memory.sh $(ASM) $(PWD)/sim/memory.lst 2>&1 | tee sim/asm.log
-	cd sim && ./simv -l simulation.og
+	cd sim && ./simv -l simulation.log
 
 synth: $(SRCS) $(SYNTH_TCL) 
 	mkdir -p synth/reports
