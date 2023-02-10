@@ -8,8 +8,7 @@ import rv32i_types::*;
     output logic br_en
 );
 
-always_comb
-begin
+always_comb begin
     case (cmpop)
         rv32i_types::beq:  br_en = $signed(rs1_out) == $signed(cmp_mux_out) ? 1 : 0;
         rv32i_types::bne:  br_en = $signed(rs1_out) != $signed(cmp_mux_out) ? 1 : 0;
@@ -17,6 +16,7 @@ begin
         rv32i_types::bge:  br_en = $signed(rs1_out) >= $signed(cmp_mux_out) ? 1 : 0;
         rv32i_types::bltu: br_en = rs1_out < cmp_mux_out ? 1 : 0;
         rv32i_types::bgeu: br_en = rs1_out >= cmp_mux_out ? 1 : 0;
+        default: br_en = 0;
     endcase
 end
 
