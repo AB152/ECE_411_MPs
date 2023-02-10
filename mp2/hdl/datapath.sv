@@ -59,6 +59,7 @@ rv32i_word cmp_mux_out;
 rv32i_word pc_out;
 rv32i_word pc_plus4_out;
 rv32i_word temp_mem_address;
+rv32i_word mem_data_out;
 
 assign mem_address = temp_mem_address & 32'hFFFFFFFC;
 /*****************************************************************************/
@@ -124,7 +125,7 @@ register MEM_DATA_OUT(
     .clk  (clk),
     .rst (rst),
     .load (load_data_out),
-    .in   (rs2_out),
+    .in   (mem_data_out),
     .out  (mem_wdata)
 );
 
@@ -152,10 +153,12 @@ always_comb begin : MUXES
     // a case statement.  Using enumerated types rather than bit vectors
     // provides compile time type safety.  Defensive programming is extremely
     // useful in SystemVerilog. 
+
+
     unique case (pcmux_sel)
         pcmux::pc_plus4: pcmux_out = pc_out + 4;
         pcmux::alu_out: pcmux_out = alu_out;
-        pcmux::alu_mod2: pcmux_out = alu_out % 2;
+        pcmux::alu_mod2: pcmux_out = alu_out & 32'hFFFFFFFC;
         // etc.
     endcase
 
@@ -184,14 +187,21 @@ always_comb begin : MUXES
         regfilemux::lb: regfilemux_out = {{24{mdrreg_out[7 + 8 * alu_out[1:0]]}}, mdrreg_out[7 + 8 * alu_out[1:0] -: 8]};
         regfilemux::lh: begin
             case (alu_out[1:0])
-                4'b00, 4'b01, 4'b10: regfilemux_out = {{16{mdrreg_out[15 + 7 * alu_out[1:0]]}}, mdrreg_out[(15 + alu_out[1:0]*7) -: 16]};
+                4'b00, 4'b01, 4'b10: regfilemux_out = {{16{mdrreg_out[15 + 8 * alu_out[1:0]]}}, mdrreg_out[(15 + alu_out[1:0]*8) -: 16]};
                 default: regfilemux_out = 0;
             endcase
         end
         regfilemux::lbu: regfilemux_out = {{24{1'b0}}, mdrreg_out[7 + 8 * alu_out[1:0] -: 8]};
-        regfilemux::lhu: regfilemux_out = {{16{1'b0}}, mdrreg_out[(15 + alu_out[1:0]*7) -: 16]};
+        regfilemux::lhu: regfilemux_out = {{16{1'b0}}, mdrreg_out[(15 + alu_out[1:0]*8) -: 16]};
         // etc.
     endcase
+
+    if(funct3 == rv32i_types::sb || funct3 == rv32i_types::sh) begin
+        mem_data_out = (rs2_out << {alu_out[1:0], 3'd0});
+    end
+    else begin
+        mem_data_out = rs2_out;
+    end
     
 
     unique case (marmux_sel)
