@@ -1,4 +1,3 @@
-
 module control
 import rv32i_types::*; /* Import types defined in rv32i_types.sv */
 (
@@ -68,8 +67,8 @@ begin : trap_check
         op_load: begin
             case (load_funct3)
                 lw: rmask = 4'b1111;
-                lh, lhu: rmask = 4'bXXXX /* Modify for MP1 Final */ ;
-                lb, lbu: rmask = 4'bXXXX /* Modify for MP1 Final */ ;
+                lh, lhu: rmask = 4'b0011 << alu_out[1:0] /* Modify for MP1 Final */ ;
+                lb, lbu: rmask = 4'b0001 << alu_out[1:0] /* Modify for MP1 Final */ ;
                 default: trap = '1;
             endcase
         end
@@ -77,8 +76,8 @@ begin : trap_check
         op_store: begin
             case (store_funct3)
                 sw: wmask = 4'b1111;
-                sh: wmask = 4'bXXXX /* Modify for MP1 Final */ ;
-                sb: wmask = 4'bXXXX /* Modify for MP1 Final */ ;
+                sh: wmask = 4'b0011 << alu_out[1:0] /* Modify for MP1 Final */ ;
+                sb: wmask = 4'b0001 << alu_out[1:0] /* Modify for MP1 Final */ ;
                 default: trap = '1;
             endcase
         end
