@@ -185,12 +185,7 @@ always_comb begin : MUXES
         regfilemux::pc_plus4: regfilemux_out = pc_out + 32'h4;
         regfilemux::lw: regfilemux_out = mdrreg_out;
         regfilemux::lb: regfilemux_out = {{24{mdrreg_out[7 + 8 * alu_out[1:0]]}}, mdrreg_out[7 + 8 * alu_out[1:0] -: 8]};
-        regfilemux::lh: begin
-            case (alu_out[1:0])
-                4'b00, 4'b01, 4'b10: regfilemux_out = {{16{mdrreg_out[15 + 8 * alu_out[1:0]]}}, mdrreg_out[(15 + alu_out[1:0]*8) -: 16]};
-                default: regfilemux_out = 0;
-            endcase
-        end
+        regfilemux::lh: regfilemux_out = {{16{mdrreg_out[15 + 8 * alu_out[1:0]]}}, mdrreg_out[(15 + alu_out[1:0]*8) -: 16]};
         regfilemux::lbu: regfilemux_out = {{24{1'b0}}, mdrreg_out[7 + 8 * alu_out[1:0] -: 8]};
         regfilemux::lhu: regfilemux_out = {{16{1'b0}}, mdrreg_out[(15 + alu_out[1:0]*8) -: 16]};
         // etc.

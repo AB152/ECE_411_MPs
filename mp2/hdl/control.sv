@@ -267,9 +267,14 @@ begin : state_actions
     else if(state == ld1) begin
         load_mdr = 1;
         mem_read = 1;
+        aluop = rv32i_types::alu_add;
+        marmux_sel = marmux::alu_out;
     end
     else if(state == st1) begin
         mem_write = 1;
+        aluop = rv32i_types::alu_add;
+        alumux2_sel = alumux::s_imm;
+        marmux_sel = marmux::alu_out;
         case(funct3)
             rv32i_types::sb: mem_byte_enable = 4'h1 << alu_out[1:0];
             rv32i_types::sh: mem_byte_enable = 4'b0011 << alu_out[1:0];
@@ -279,6 +284,8 @@ begin : state_actions
     else if(state == ld2) begin
         load_regfile = 1;
         load_pc = 1;
+        aluop = rv32i_types::alu_add;
+        marmux_sel = marmux::alu_out;
         // regfilemux_sel = regfilemux::lw;
         case(funct3)
             rv32i_types::lw: regfilemux_sel = regfilemux::lw;
@@ -291,6 +298,9 @@ begin : state_actions
     end
     else if(state == st2) begin
         load_pc = 1;
+        aluop = rv32i_types::alu_add;
+        alumux2_sel = alumux::s_imm;
+        marmux_sel = marmux::alu_out;
         // rs1_addr = rs1;
         // rs2_addr = rs2;
     end
