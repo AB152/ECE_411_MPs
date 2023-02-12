@@ -11,6 +11,8 @@ import rv32i_types::*; /* Import types defined in rv32i_types.sv */
     input logic [4:0] rs2,
     input logic mem_resp,
     input logic [31:0] alu_out,
+    input rv32i_word temp_mem_address,
+
     output pcmux::pcmux_sel_t pcmux_sel,
     output alumux::alumux1_sel_t alumux1_sel,
     output alumux::alumux2_sel_t alumux2_sel,
@@ -67,8 +69,8 @@ begin : trap_check
         op_load: begin
             case (load_funct3)
                 lw: rmask = 4'b1111;
-                lh, lhu: rmask = 4'b0011 << alu_out[1:0] /* Modify for MP1 Final */ ;
-                lb, lbu: rmask = 4'b0001 << alu_out[1:0] /* Modify for MP1 Final */ ;
+                lh, lhu: rmask = 4'b0011 << temp_mem_address[1:0] /* Modify for MP1 Final */ ;
+                lb, lbu: rmask = 4'b0001 << temp_mem_address[1:0] /* Modify for MP1 Final */ ;
                 default: trap = '1;
             endcase
         end
@@ -76,8 +78,8 @@ begin : trap_check
         op_store: begin
             case (store_funct3)
                 sw: wmask = 4'b1111;
-                sh: wmask = 4'b0011 << alu_out[1:0] /* Modify for MP1 Final */ ;
-                sb: wmask = 4'b0001 << alu_out[1:0] /* Modify for MP1 Final */ ;
+                sh: wmask = 4'b0011 << temp_mem_address[1:0] /* Modify for MP1 Final */ ;
+                sb: wmask = 4'b0001 << temp_mem_address[1:0] /* Modify for MP1 Final */ ;
                 default: trap = '1;
             endcase
         end
@@ -101,6 +103,7 @@ enum int unsigned {
     br,
     ld1,
     st1,
+    st12,
     ld2,
     st2,
     jal,
@@ -241,11 +244,10 @@ begin : state_actions
         marmux_sel = marmux::alu_out;
     end
     else if(state == calc_addr_store) begin
-        aluop = rv32i_types::alu_add;
-        load_mar = 1;
-        load_data_out = 1;
         alumux2_sel = alumux::s_imm;
+        aluop = rv32i_types::alu_add;
         marmux_sel = marmux::alu_out;
+        load_mar = 1;
     end
     else if(state == auipc) begin
         alumux1_sel = alumux::pc_out;
@@ -271,16 +273,26 @@ begin : state_actions
         marmux_sel = marmux::alu_out;
     end
     else if(state == st1) begin
-        mem_write = 1;
+        load_data_out = 1;
         aluop = rv32i_types::alu_add;
         alumux2_sel = alumux::s_imm;
         marmux_sel = marmux::alu_out;
         case(funct3)
-            rv32i_types::sb: mem_byte_enable = 4'h1 << alu_out[1:0];
-            rv32i_types::sh: mem_byte_enable = 4'b0011 << alu_out[1:0];
+            rv32i_types::sb: mem_byte_enable = 4'h1 << temp_mem_address[1:0];
+            rv32i_types::sh: mem_byte_enable = 4'b0011 << temp_mem_address[1:0];
             default: mem_byte_enable = 4'hF;
         endcase
     end
+
+    else if (state == st12) begin
+        mem_write = 1;
+        case(funct3)
+            rv32i_types::sb: mem_byte_enable = 4'h1 << temp_mem_address[1:0];
+            rv32i_types::sh: mem_byte_enable = 4'b0011 << temp_mem_address[1:0];
+            default: mem_byte_enable = 4'hF;
+        endcase
+    end
+
     else if(state == ld2) begin
         load_regfile = 1;
         load_pc = 1;
@@ -438,10 +450,13 @@ begin : next_state_logic
     else if(state == calc_addr_store) begin
         next_state = st1;
     end
-    else if(state == st1 && mem_resp == 0) begin
-        next_state = st1;
-    end
     else if(state == st1) begin
+        next_state = st12;
+    end
+    else if (state == st12 && mem_resp == 1'b0) begin
+        next_state = st12;
+    end
+    else if(state == st12 && mem_resp == 1'b1) begin
         next_state = st2;
     end
     else if(state == st2) begin

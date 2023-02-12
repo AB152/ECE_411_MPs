@@ -42,6 +42,7 @@ rv32i_word rd;
 rv32i_word regfilemux_out;
 rv32i_word mdrreg_out;
 rv32i_word alu_out;
+rv32i_word temp_mem_address;
 /*****************************************************************************/
 
 /**************************** Control Signals ********************************/
@@ -67,6 +68,8 @@ control control(
     .rs2(rs2),
     .mem_resp(mem_resp),
     .alu_out(alu_out),
+    .temp_mem_address(temp_mem_address),
+
     .pcmux_sel(pcmux_sel),
     .alumux1_sel(alumux1_sel),
     .alumux2_sel(alumux2_sel),
@@ -101,6 +104,7 @@ datapath datapath(
     .rs1(rs1),
     .rs2(rs2),
     .mem_address(mem_address),
+    .temp_mem_address(temp_mem_address),
 
     .pcmux_sel(pcmux_sel),
     .alumux1_sel(alumux1_sel),

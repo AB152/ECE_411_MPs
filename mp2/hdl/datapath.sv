@@ -21,6 +21,7 @@ import rv32i_types::*;
     output logic [4:0] rs2,
     output rv32i_word mem_address,
     output rv32i_word alu_out,
+    output rv32i_word temp_mem_address,
 
     input pcmux::pcmux_sel_t pcmux_sel,
     input alumux::alumux1_sel_t alumux1_sel,
@@ -62,6 +63,7 @@ rv32i_word temp_mem_address;
 rv32i_word mem_data_out;
 
 assign mem_address = temp_mem_address & 32'hFFFFFFFC;
+
 /*****************************************************************************/
 
 
@@ -184,15 +186,15 @@ always_comb begin : MUXES
         regfilemux::u_imm: regfilemux_out = u_imm;
         regfilemux::pc_plus4: regfilemux_out = pc_out + 32'h4;
         regfilemux::lw: regfilemux_out = mdrreg_out;
-        regfilemux::lb: regfilemux_out = {{24{mdrreg_out[7 + 8 * alu_out[1:0]]}}, mdrreg_out[7 + 8 * alu_out[1:0] -: 8]};
-        regfilemux::lh: regfilemux_out = {{16{mdrreg_out[15 + 8 * alu_out[1:0]]}}, mdrreg_out[(15 + alu_out[1:0]*8) -: 16]};
-        regfilemux::lbu: regfilemux_out = {{24{1'b0}}, mdrreg_out[7 + 8 * alu_out[1:0] -: 8]};
-        regfilemux::lhu: regfilemux_out = {{16{1'b0}}, mdrreg_out[(15 + alu_out[1:0]*8) -: 16]};
+        regfilemux::lb: regfilemux_out = {{24{mdrreg_out[7 + 8 * temp_mem_address[1:0]]}}, mdrreg_out[7 + 8 * temp_mem_address[1:0] -: 8]};
+        regfilemux::lh: regfilemux_out = {{16{mdrreg_out[15 + 8 * temp_mem_address[1:0]]}}, mdrreg_out[(15 + temp_mem_address[1:0]*8) -: 16]};
+        regfilemux::lbu: regfilemux_out = {{24{1'b0}}, mdrreg_out[7 + 8 * temp_mem_address[1:0] -: 8]};
+        regfilemux::lhu: regfilemux_out = {{16{1'b0}}, mdrreg_out[(15 + temp_mem_address[1:0]*8) -: 16]};
         // etc.
     endcase
 
-    if(funct3 == rv32i_types::sb || funct3 == rv32i_types::sh) begin
-        mem_data_out = (rs2_out << {alu_out[1:0], 3'd0});
+    if(opcode == rv32i_types::op_store && (funct3 == rv32i_types::sb || funct3 == rv32i_types::sh)) begin
+        mem_data_out = (rs2_out << (8*temp_mem_address[1:0]));
     end
     else begin
         mem_data_out = rs2_out;
