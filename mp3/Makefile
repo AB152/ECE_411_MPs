@@ -16,7 +16,14 @@ VCS_FLAGS= -full64 -lca -sverilog +lint=all,noNS -timescale=1ns/10ps -debug_acc+
 
 sim/simv: $(SRCS) $(ASM)
 	mkdir -p sim
-	cd sim && vcs $(SRCS) $(VCS_FLAGS) -msg_config=../warn.config -l compile.log
+	cd sim && vcs $(SRCS) $(VCS_FLAGS) -msg_config=../warn.config -l compile.log -top mp3_tb
+
+sim/cache_dut : $(SRCS)
+	mkdir -p sim
+	cd sim && vcs $(SRCS) $(VCS_FLAGS) -msg_config=../warn.config -l compile_dut.log -top cache_dut_tb -o cache_dut
+
+run_cache_dut: sim/cache_dut
+	cd sim && ./cache_dut -l simulation_dut.log
 
 run: sim/simv $(ASM)
 	bin/rv_load_memory.sh $(ASM) $(PWD)/sim/memory.lst 2>&1 | tee sim/asm.log

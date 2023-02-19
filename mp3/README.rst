@@ -67,6 +67,8 @@ MP3 Design Diagram
 Cache Specifications
 ====================
 
+A write-back and write-allocate set-associative cache is a commonly-used cache design, minimizing the number of writes to the next-level of the memory hierarchy and allowing fast access to frequently-used data. The cache is organized into sets, with each set containing multiple cachelines (the number of ways). Each cacheline is assigned a tag that identifies the memory location it stores, and a per-cacheline valid bit indicates whether the data in the cacheline is valid or not. Upon a cache miss, when new data from the memory has to be stored in a cacheline, the replacement policy indicates which cacheline in the set should be evicted. Writes to a cacheline require asserting the dirty bit, and any updates made to a cacheline are propagated back to the next-level of the memory hierarchy when that cacheline is evicted.
+
 You will need to design (and verify) a **one-level, unified, 2-way set-associative cache** with the
 following specifications:
 
@@ -256,14 +258,9 @@ new folder for MP3. The steps for copying and beginning MP3 are below.
      $ git fetch release
      $ git merge --allow-unrelated-histories release/mp3 -m "Merging MP3"
 
-2. Copy your MP1 cache line adapter design into your MP3 directory or use the given solution::
+2. Copy your MP1 cacheline adaptor design into your mp3/hdl directory::
 
      $ cp -pn mp1/cacheline_adaptor/hdl/cacheline_adaptor.sv mp3/hdl
-
-      or
-
-     $ mv mp3/cacheline_adaptor.sv mp3/hdl
-
 
 3. Copy your MP2 design into your MP3 directory. Note that we have given you fresh copies of the
    provided CPU files. Do not overwrite these as the autograder will use clean copies and your
