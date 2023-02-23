@@ -32,7 +32,9 @@ loop1:
     auipc x7, 8         # X7 <= PC + 8
     lw x8, good         # X8 <= 0x600d600d
     la x10, result      # X10 <= Addr[result]
-    # sw x8, 0(x10)       # [Result] <= 0x600d600d
+    sw x8, 0(x10)       # [Result] <= 0x600d600d
+    sb x8, 0(x10)
+    sw x9, good       # X9 <= [Result]
     lw x9, result       # X9 <= [Result]
     lb x2, good
     lh x2, good

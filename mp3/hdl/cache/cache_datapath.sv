@@ -211,14 +211,27 @@ always_comb begin
     load_data_1 = (load_data & lru_o);// | (in_compare_tag & hit_1);
 
 // should be 0 on hit_overall
-    // if(hit_overall & mem_read) begin
-    //     write_en_0 = 32'b0;
-    // end
-    // else if() begin
+    if(hit_overall & mem_read) begin
+        write_en_0 = 32'b0;
+    end
+    else if(mem_read) begin
+        write_en_0 = {32{load_data_0}};
+    end
+    else if(mem_write) begin
+        write_en_0 = mem_byte_enable256 | {32{load_data_0}};
+    end
 
-    // end
-    write_en_0 = (hit_overall & mem_read) ? 32'b0 : {32{load_data_0}};
-    write_en_1 = (hit_overall & mem_read) ? 32'b0 : {32{load_data_1}};
+    if(hit_overall & mem_read) begin
+        write_en_1 = 32'b0;
+    end
+    else if(mem_read) begin
+        write_en_1 = {32{load_data_1}};
+    end
+    else if(mem_write) begin
+        write_en_1 = mem_byte_enable256 | {32{load_data_1}};
+    end
+    // write_en_0 = (hit_overall & mem_read) ? 32'b0 : mem_byte_enable256 | {32{load_data_0}};
+    // write_en_1 = (hit_overall & mem_read) ? 32'b0 : mem_byte_enable256 | {32{load_data_1}};
 
     // 0x0000000f & 0xffffffff = 0x0000000f;
     // 0x0000000f | 0xffffffff = 0xffffffff;
