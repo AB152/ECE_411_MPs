@@ -5,13 +5,13 @@ bytes at a time).*/
 
 module bus_adapter
 (
-    output [255:0] mem_wdata256,
-    input [255:0] mem_rdata256,
-    input [31:0] mem_wdata,
-    output [31:0] mem_rdata,
-    input [3:0] mem_byte_enable,
-    output logic [31:0] mem_byte_enable256,
-    input [31:0] address
+    output [255:0] mem_wdata256, // Interface with memory
+    input [255:0] mem_rdata256, // Interface with memory
+    input [31:0] mem_wdata, // Interface with CPU
+    output [31:0] mem_rdata, // Interface with CPU
+    input [3:0] mem_byte_enable, // Interface with CPU
+    output logic [31:0] mem_byte_enable256, // Interface with memory
+    input [31:0] address // Interface with CPU
 );
 
 assign mem_wdata256 = {8{mem_wdata}};
