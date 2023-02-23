@@ -3,7 +3,7 @@ valid, dirty, tag, and LRU arrays, comparators, muxes,
 logic gates and other supporting logic. */
 
 module cache_datapath
-import rv32i_types::*;
+// import rv32i_types::*;
 #(
     parameter s_offset = 5,
     parameter s_index  = 3,
@@ -16,7 +16,7 @@ import rv32i_types::*;
     input clk,
     input rst,
 
-    input rv32i_word mem_address,
+    input logic [31:0] mem_address,
     input logic [255:0] mem_wdata256,
     output logic [255:0] mem_rdata256,
     input logic [31:0] mem_byte_enable256,
@@ -40,7 +40,7 @@ import rv32i_types::*;
 
     input logic [255:0] pmem_rdata_256,
     output logic [255:0] pmem_wdata_256,
-    output rv32i_word pmem_address_cache
+    output logic [31:0] pmem_address_cache
     // output logic pmem_read_cache,
     // output logic pmem_write_cache,
     // input logic pmem_resp_cache
@@ -211,6 +211,12 @@ always_comb begin
     load_data_1 = (load_data & lru_o);// | (in_compare_tag & hit_1);
 
 // should be 0 on hit_overall
+    // if(hit_overall & mem_read) begin
+    //     write_en_0 = 32'b0;
+    // end
+    // else if() begin
+
+    // end
     write_en_0 = (hit_overall & mem_read) ? 32'b0 : {32{load_data_0}};
     write_en_1 = (hit_overall & mem_read) ? 32'b0 : {32{load_data_1}};
 

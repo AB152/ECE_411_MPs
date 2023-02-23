@@ -2,7 +2,7 @@
 controller, cache datapath, and bus adapter. */
 
 module cache 
-import rv32i_types::*;
+// import rv32i_types::*;
 #(
     parameter s_offset = 5,
     parameter s_index  = 3,

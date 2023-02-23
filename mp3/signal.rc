@@ -16,14 +16,14 @@ signalSpacing 5
 
 ; windowTimeUnit is used for zoom, cursor & marker
 ; waveform viewport range
-zoom 39013.000954 53986.999046
-cursor 46096.50903347605
+zoom 15634242.462242 15649216.460334
+cursor 45920.63006297004
 marker 0.000000
 
 ; user define markers
 ; userMarker time_pos marker_name color linestyle
 ; visible top row signal index
-top 15
+top 24
 ; marker line index
 markerPos 14
 

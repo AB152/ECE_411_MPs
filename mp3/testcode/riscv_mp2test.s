@@ -27,7 +27,8 @@ loop1:
     bleu x4, x1, loop1   # Branch if last result was zero or positive.
 
     andi x6, x3, 64   # X6 <= X3 + 64
-
+    # jal x1, good
+    # jalr x5, x1, 3
     auipc x7, 8         # X7 <= PC + 8
     lw x8, good         # X8 <= 0x600d600d
     la x10, result      # X10 <= Addr[result]
@@ -37,8 +38,6 @@ loop1:
     lh x2, good
     lbu x2, good
     lhu x2, good
-    # jal x1, 3
-    # jalr x5, x1, 3
     bne x8, x9, deadend # PC <= bad if x8 != x9
 
 halt:                 # Infinite loop to keep the processor
