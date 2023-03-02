@@ -2,7 +2,7 @@ Magic 271485
 Revision Verdi_R-2020.12-SP1-1
 
 ; Window Layout <x> <y> <width> <height> <signalwidth> <valuewidth>
-viewPort 0 25 1635 315 228 212
+viewPort 0 25 1920 482 228 164
 
 ; File list:
 ; openDirFile [-d delimiter] [-s time_offset] [-rf auto_bus_rule_file] path_name file_name
@@ -16,16 +16,16 @@ signalSpacing 5
 
 ; windowTimeUnit is used for zoom, cursor & marker
 ; waveform viewport range
-zoom 15634242.462242 15649216.460334
-cursor 45920.63006297004
+zoom 0.000000 111605.000000
+cursor 102316.96737683090
 marker 0.000000
 
 ; user define markers
 ; userMarker time_pos marker_name color linestyle
 ; visible top row signal index
-top 24
+top 15
 ; marker line index
-markerPos 14
+markerPos 43
 
 ; event list
 ; addEvent event_name event_expression
@@ -48,7 +48,6 @@ curSTATUS ByChange
 addGroup "G1"
 activeDirFile "" "/home/akshayb3/ECE_411/mp3/sim/dump.fsdb"
 addSignal -h 15 -UNSIGNED /mp3_tb/dut/cache/control/curr_state[3:0]
-addSignal -h 15 -UNSIGNED -holdScope next_state[3:0]
 addSignal -h 15 -UNSIGNED -HEX /mp3_tb/dut/cache/datapath/mem_address[31:0]
 addSignal -h 15 -holdScope load_tag_0
 addSignal -h 15 -holdScope load_tag_1
@@ -64,6 +63,7 @@ addSignal -h 15 -holdScope write_en_1[31:0]
 addSignal -h 15 -holdScope valid_0
 addSignal -h 15 -holdScope valid_1
 addSignal -h 15 -holdScope mem_write
+addSignal -h 15 -holdScope mem_read
 addSignal -h 15 /mp3_tb/dut/cache/control/pmem_resp
 addSignal -h 15 /mp3_tb/dut/cache/datapath/pmem_rdata_256[255:0]
 addSignal -h 15 -holdScope mem_rdata256[255:0]
@@ -77,10 +77,19 @@ addSignal -h 15 -holdScope miss_overall
 addSignal -h 15 -holdScope hit_overall
 addSignal -h 15 -holdScope hit_0
 addSignal -h 15 -holdScope hit_1
-addSignal -h 15 -holdScope mem_read
 addSignal -h 15 -holdScope clk
 addSignal -h 15 -holdScope rst
 addSignal -h 15 -holdScope lru_o
+addSignal -h 15 /mp3_tb/dut/cache/datapath/Tag_0/load
+addSignal -h 15 -holdScope rindex[2:0]
+addSignal -h 15 -holdScope windex[2:0]
+addSignal -h 15 -holdScope datain[23:0]
+addSignal -h 15 -holdScope data[7:0]
+addSignal -h 15 /mp3_tb/dut/cache/datapath/LRU_0/load
+addSignal -h 15 -holdScope datain[0:0]
+addSignal -h 15 -holdScope _dataout[0:0]
+addSignal -h 15 /mp3_tb/dut/cpu/datapath/PC/out[31:0]
+addSignal -h 15 /mp3_tb/dut/cache/datapath/mem_byte_enable256[31:0]
 addGroup "G2"
 
 ; getSignalForm Scope Hierarchy Status

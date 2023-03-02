@@ -98,14 +98,16 @@ always_comb
                     end
                 compare_tag:
                     begin
-                        if(hit_overall) begin
-                            load_tag = 1'b1;
-                            load_valid = 1'b1;
-                        end
-                        else begin
-                            load_tag = 1'b0;
-                            load_valid = 1'b0;
-                        end
+                        // if(hit_overall) begin
+                        //     load_tag = 1'b1;
+                        //     load_valid = 1'b1;
+                        // end
+                        // else begin
+                        //     load_tag = 1'b0;
+                        //     load_valid = 1'b0;
+                        // end
+                        load_tag = 1'b0;
+                        load_valid = 1'b0;
                         if(mem_write) begin
                             load_dirty = 1'b1;
                         end
