@@ -211,31 +211,61 @@ always_comb begin
     load_data_1 = (load_data & lru_o);// | (in_compare_tag & hit_1);
 
 // should be 0 on hit_overall
-    if(hit_overall & mem_read) begin
+    if(hit_overall & mem_read & in_compare_tag) begin
         write_en_0 = 32'b0;
     end
-    else if(mem_read) begin
+    else if(hit_overall & mem_write & in_compare_tag) begin
+        write_en_0 = mem_byte_enable256 & {32{hit_0}};
+    end
+    else if(mem_read & data_in_sel) begin
         write_en_0 = {32{load_data_0}};
     end
-    else if(mem_write) begin
-        write_en_0 = mem_byte_enable256;
+    else if(mem_write & write_back_state) begin
+        write_en_0 = 32'b0;
+    end
+    else if(mem_write & data_in_sel) begin
+        write_en_0 = {32{load_data_0}};
     end
     else begin
         write_en_0 = 32'b0;
     end
 
-    if(hit_overall & mem_read) begin
+
+
+
+
+
+    if(hit_overall & mem_read & in_compare_tag) begin
         write_en_1 = 32'b0;
     end
-    else if(mem_read) begin
+    else if(hit_overall & mem_write & in_compare_tag) begin
+        write_en_1 = mem_byte_enable256 & {32{hit_1}};
+    end
+    else if(mem_read & data_in_sel) begin
         write_en_1 = {32{load_data_1}};
     end
-    else if(mem_write) begin
-        write_en_1 = mem_byte_enable256;
+    else if(mem_write & write_back_state) begin
+        write_en_1 = 32'b0;
+    end
+    else if(mem_write & data_in_sel) begin
+        write_en_1 = {32{load_data_1}};
     end
     else begin
         write_en_1 = 32'b0;
     end
+
+    // if(hit_overall & mem_read) begin
+    //     write_en_1 = 32'b0;
+    // end
+    // else if(mem_read) begin
+    //     write_en_1 = {32{load_data_1}};
+    // end
+    // else if(mem_write) begin
+    //     write_en_1 = mem_byte_enable256;
+    // end
+    // else begin
+    //     write_en_1 = 32'b0;
+    // end
     // write_en_0 = (hit_overall & mem_read) ? 32'b0 : mem_byte_enable256 | {32{load_data_0}};
     // write_en_1 = (hit_overall & mem_read) ? 32'b0 : mem_byte_enable256 | {32{load_data_1}};
 
